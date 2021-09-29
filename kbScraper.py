@@ -1,7 +1,8 @@
 from bs4 import BeautifulSoup as bs
 import requests
 import lxml
-
+import openpyxl as opx
+import pandas as pd
 
 class Scraper:
 
@@ -26,8 +27,10 @@ class Scraper:
             pageURL = Scraper.URL + f"?page={pageIndex}"
             pageURL_requests = requests.get(pageURL)
             pageSoup = bs(pageURL_requests.content, 'lxml')
+
             for price in pageSoup.find_all("span", {"class": "theme-money"}):
                 Scraper.priceList.append(price.text)
+
             for product in pageSoup.find_all("div", {"class": "product-block__title"}):
                 Scraper.productTitleList.append(product.text)
             pageIndex += 1
@@ -41,6 +44,21 @@ class Scraper:
 
 
 Scraper.getData()
-Scraper.printData()
+# Scraper.printData()
+
+workbook = opx.Workbook()
+workbookFileName = "KBsheet.xlsx"
+
+activeWorksheet = workbook.active
+activeWorksheet.title = "Keycaps"
+
+testDF = pd.DataFrame(Scraper.productTitleList)
+writer = pd.ExcelWriter(r"C:\Users\valex\Desktop\KBsheet.xlsx")
+testDF.to_excel(writer, sheet_name="Keycaps", index=False)
+writer.save()
+
+
+
+
 
 print('end')
