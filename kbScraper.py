@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup as bs
 import requests
-import lxml
+import xlsxwriter
 import openpyxl as opx
 import pandas as pd
 
@@ -49,15 +49,16 @@ Scraper.getData()
 workbook = opx.Workbook()
 workbookFileName = "KBsheet.xlsx"
 
+
 activeWorksheet = workbook.active
 activeWorksheet.title = "Keycaps"
 
 testDF = pd.DataFrame(Scraper.productTitleList)
-writer = pd.ExcelWriter(r"C:\Users\valex\Desktop\KBsheet.xlsx")
+writer = pd.ExcelWriter(r"C:\Users\VD102541\Desktop\KBsheet.xlsx")
 testDF.to_excel(writer, sheet_name="Keycaps", index=False)
+writer.sheets['Keycaps'].set_column('A:A', 75)
+
 writer.save()
-
-
 
 
 
