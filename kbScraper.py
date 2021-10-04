@@ -18,7 +18,7 @@ class Scraper:
 
     priceList = []
     productTitleList = []
-
+    productAndPriceZipped = []
 
     def getData():
 
@@ -29,22 +29,22 @@ class Scraper:
             pageSoup = bs(pageURL_requests.content, 'lxml')
 
             for price in pageSoup.find_all("span", {"class": "theme-money"}):
-                Scraper.priceList.append(price.text)
+                Scraper.priceList.append(price.text.strip())
 
             for product in pageSoup.find_all("div", {"class": "product-block__title"}):
-                Scraper.productTitleList.append(product.text)
+                Scraper.productTitleList.append(product.text.strip())
             pageIndex += 1
 
 
-    def printData():
+    def zipData():
 
         for product, price in zip(Scraper.productTitleList, Scraper.priceList):
-            print(product.strip() + "..." + price.strip())
+            Scraper.productAndPriceZipped.append((product, price))
 
 
 
 Scraper.getData()
-# Scraper.printData()
+Scraper.zipData()
 
 workbook = opx.Workbook()
 workbookFileName = "KBsheet.xlsx"
@@ -53,9 +53,10 @@ workbookFileName = "KBsheet.xlsx"
 activeWorksheet = workbook.active
 activeWorksheet.title = "Keycaps"
 
-testDF = pd.DataFrame(Scraper.productTitleList)
+productColumn = pd.DataFrame(Scraper.productAndPriceZipped, columns=["Product", "Price"])
 writer = pd.ExcelWriter(r"C:\Users\VD102541\Desktop\KBsheet.xlsx")
-testDF.to_excel(writer, sheet_name="Keycaps", index=False)
+productColumn.to_excel(writer, sheet_name="Keycaps", index=False)
+
 writer.sheets['Keycaps'].set_column('A:A', 75)
 
 writer.save()
