@@ -1,14 +1,18 @@
 from bs4 import BeautifulSoup as bs
+from numpy import product
 import requests
 import pandas as pd
+import openpyxl as opx
 
 
 
-priceList = []
-productTitleList = []
-productAndPriceZipped = []
 
-def getData(URL, sheetTitle):
+
+def getData(URL):
+
+    priceList = []
+    productTitleList = []
+    productAndPriceZipped = []
 
     page = requests.get(URL)
     pageSoup = bs(page.content, "lxml")
@@ -30,26 +34,30 @@ def getData(URL, sheetTitle):
     for product, price in zip(productTitleList, priceList):
         productAndPriceZipped.append((product, price))
 
+    return productAndPriceZipped
 
 
+sheetNames = ['Keycaps', 'Switches', 'Accessories', 'Kits']
+listOfURLs = ["https://kbdfans.com/collections/keycaps",
+              "https://kbdfans.com/collections/switches",
+              "https://kbdfans.com/collections/keyboard-part",
+              "https://kbdfans.com/collections/diy-kit"]
+    
 
-    sheetTitles = ['Keycaps', 'Switches']
+df = pd.DataFrame(columns=['Product Name', 'Price'])
+writer = pd.ExcelWriter(r"C:\Users\VD102541\Desktop\KBsheet.xlsx")
 
-    productColumn = pd.DataFrame(productAndPriceZipped, columns=["Product", "Price"])
-    writer = pd.ExcelWriter(r"C:\Users\VD102541\Desktop\KBsheet.xlsx")
-    productColumn.to_excel(writer, sheet_name=sheetTitle, index=False)
+for name in sheetNames:
+    df.to_excel(writer, sheet_name=name, index=False)
+    writer.sheets[str(name)].set_column('A:A', 75)
 
-    writer.sheets[sheetTitle].set_column('A:A', 75)
+for index, url in enumerate(listOfURLs):
+    getData(url)
+    urlDF = pd.DataFrame(getData(url), columns=['Product Name', 'Price'])
+    urlDF.to_excel(writer, sheet_name=sheetNames[index], index=False)
+writer.save()
 
-    writer.save()
 
-
-#function calls
-
-# I don't know why these 2 function calls don't create new sheets within KBsheet. The result of these 2 function calls is a single sheet, whichever was called second
-# (in this case it's keycaps)
-getData('https://kbdfans.com/collections/switches', 'Switches')
-getData('https://kbdfans.com/collections/keycaps', 'Keycaps')
 
 
 print('end')
