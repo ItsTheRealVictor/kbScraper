@@ -5,11 +5,10 @@ import pandas as pd
 import openpyxl as opx
 
 
-
-
-
 def getData(URL):
-
+    '''Gets product title and pricing data from a shopify site. The title and price are zipped into a list of tuples, later converted to Pandas 
+    dataframes and copied to an excel spreadsheet'''
+    
     priceList = []
     productTitleList = []
     productAndPriceZipped = []
@@ -36,21 +35,25 @@ def getData(URL):
 
     return productAndPriceZipped
 
-
-sheetNames = ['Keycaps', 'Switches', 'Accessories', 'Kits']
+'''URLs can be added or removed from these lists based on the product categories for which the user wants pricing data. 
+# A corresponding sheet name must be added to sheetNames for each URL'''
 listOfURLs = ["https://kbdfans.com/collections/keycaps",
               "https://kbdfans.com/collections/switches",
               "https://kbdfans.com/collections/keyboard-part",
               "https://kbdfans.com/collections/diy-kit"]
+sheetNames = ['Keycaps', 'Switches', 'Accessories', 'Kits']
     
 
+#(There might be a more elegant way to do this) This is a boilerplate Dataframe, copied to each sheet from the sheetNames list.
 df = pd.DataFrame(columns=['Product Name', 'Price'])
 writer = pd.ExcelWriter(r"C:\Users\VD102541\Desktop\KBsheet.xlsx")
 
+# creates the sheets from sheetNames
 for name in sheetNames:
     df.to_excel(writer, sheet_name=name, index=False)
     writer.sheets[str(name)].set_column('A:A', 75)
-
+    
+# iteratively passes urls from listOfURLs to the getData() function. A dataframe is created for each URL and copied to the spreadsheet. 
 for index, url in enumerate(listOfURLs):
     getData(url)
     urlDF = pd.DataFrame(getData(url), columns=['Product Name', 'Price'])
